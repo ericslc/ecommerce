@@ -1,67 +1,59 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var mongo = require('mongojs');
-
+var mongoose = require('mongoose');
 var app = express();
 var port = 8005;
-var db = mongo('ecommerce', ['products']);
+var Product = require('./products');
 
 app.use(cors());
 app.use(bodyParser.json());
 
-
+mongoose.set("debug", true);
+mongoose.connect("mongodb://localhost/products");
+mongoose.connection.once("open", function(){
+  console.log("connected to mongodb");
+});
 app.get('/api/products', function(req, res){
-	var query = {};
-	if(req.query.id) {
-		query._id = mongo.ObjectId(req.query.id);
-	}
-	if(req.query.title){
-		query.title = req.query.title;
-	}
-	db.products.find(query, function(err, response){
-		if(err) {
-			res.status(500).json(err);
-		} else {
-			res.json(response);
-		}
-	});
+	var query;
+	if(req.query.status){
+	  query = {status: req.query.status}
+	}else{
+	  query = {}
+	};
+	Product.find(query, function(err, product) {
+	 return res.send(product);
+});
 });
 
 app.post('/api/products', function(req, res){
-	db.products.save(req.body, function(error, response){
-		if(error) {
-			return res.status(500).json(error);
-		} else {
-			return res.json(response);
-		}
-	})
+	var product = new Product(req.body);
+  product.save(function(err, s){
+    return err ? res.status(500).send(err) : res.send(s);
 });
+});  
+
 
 app.put('/api/products', function(req, res){
-	if(!req.query.id){
-		return res.status(400).send('id query needed');
-	}
-	var query = {
-		_id: mongo.ObjectId(req.query.id)
-	};
-	db.products.update(query, req.body, function(error, response){
-		if(error) {
-			return res.status(500).json(error);
-		} else {
-			return res.json(response);
-		}
-	})
+	Product.findById(req.query.id, function(err, product){
+	  product.update(req.body, function(err, product){
+	    if(err){
+	      return res.status(500).send(err);
+	    }else{
+	      Product.findById(req.query.id, function(err, product){
+	        return res.send(s);
+	      });
+	    }
+	  });
+	});
 });
 
 app.delete('/api/products', function(req, res){
 	if(!req.query.id){
 		return res.status(400).send('id query needed');
 	};
-	var query = {
-		_id: mongo.ObjectId(req.query.id)
-	};
-	db.products.remove(query, function(error, response){
+
+	Product.findByIdAndRemove(req.query.id, function(error, response){
 		if(error) {
 			return res.status(500).json(error);
 		} else {
@@ -71,4 +63,4 @@ app.delete('/api/products', function(req, res){
 });
 app.listen(port, function(){
 	console.log('Now listening on port: ' + port);
-});
+	});
