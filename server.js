@@ -6,6 +6,8 @@ var app = express();
 var port = 8005;
 var Product = require('./products');
 
+
+app.use(express.static(__dirname + '/public'));
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -31,7 +33,7 @@ app.post('/api/products', function(req, res){
   product.save(function(err, s){
     return err ? res.status(500).send(err) : res.send(s);
 });
-});  
+});
 
 
 app.put('/api/products', function(req, res){
