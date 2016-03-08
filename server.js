@@ -1,57 +1,74 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var mongojs = require('mongojs');
+var mongo = require('mongojs');
 
 var app = express();
-
 var port = 8005;
-var db = mongojs('ecommerse');
-var collection = db.collection('ecommerce');
-app.use(bodyParser.json());
+var db = mongo('ecommerce', ['products']);
+
 app.use(cors());
-
-
-app.post('/products', function(req, res){
-  console.log('post');
-  return res.status('200').send('post')
-});
+app.use(bodyParser.json());
 
 
 app.get('/api/products', function(req, res){
-  var query = {};
-  if(req.query.id){
-    query._id = mongojs.ObjectId(req.query.id);
-  };
-  if(req.query.name){
-    query.name = req.query.name;
-  }
-collection.find(query, function(err, response){
-  if(err){
-    return res.status('500').send("err");
-  }else{
-    return res.status('200').send('response');
-  };
-});
-/*console.log('get');
-  return res.status('200').send('get')*/
+	var query = {};
+	if(req.query.id) {
+		query._id = mongo.ObjectId(req.query.id);
+	}
+	if(req.query.title){
+		query.title = req.query.title;
+	}
+	db.products.find(query, function(err, response){
+		if(err) {
+			res.status(500).json(err);
+		} else {
+			res.json(response);
+		}
+	});
 });
 
-
-app.put('/products/:id', function(req, res){
-  console.log('put');
-  return res.status('200').send('put')
+app.post('/api/products', function(req, res){
+	db.products.save(req.body, function(error, response){
+		if(error) {
+			return res.status(500).json(error);
+		} else {
+			return res.json(response);
+		}
+	})
 });
 
-
-app.delete('/products/:id', function(req, res){
-  console.log('delete');
-  return res.status('200').send('delete')
+app.put('/api/products', function(req, res){
+	if(!req.query.id){
+		return res.status(400).send('id query needed');
+	}
+	var query = {
+		_id: mongo.ObjectId(req.query.id)
+	};
+	db.products.update(query, req.body, function(error, response){
+		if(error) {
+			return res.status(500).json(error);
+		} else {
+			return res.json(response);
+		}
+	})
 });
 
-
-
-
-app.listen(port, function(req, res){
-  console.log("listening on port " + port);
+app.delete('/api/products', function(req, res){
+	if(!req.query.id){
+		return res.status(400).send('id query needed');
+	};
+	var query = {
+		_id: mongo.ObjectId(req.query.id)
+	};
+	db.products.remove(query, function(error, response){
+		if(error) {
+			return res.status(500).json(error);
+		} else {
+			return res.json(response);
+		}
+	})
+});
+app.listen(port, function(){
+	console.log('Now listening on port: ' + port);
 });
