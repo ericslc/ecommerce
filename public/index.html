@@ -1,0 +1,30 @@
+<!doctype html>
+<html ng-app="myApp">
+<head>
+
+  <title>store</title>
+</head>
+<body ng-controller="mainCtrl">
+
+{{test}}
+<nav class="navbar" role="navigation">
+    <div class="navbar-header">
+      <a class="navbar-brand">My Store</a>
+    </div>
+    <ul class="nav">
+<li><a ui-sref="home">Home</a></li>
+<li><a ui-sref="products">products</a></li>
+<li><a ui-sref="admin">Admin</a></li>
+
+</ul>
+</nav>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/mainCtrl.js"></script>
+<script src="/js/service.js"></script>
+</body>
+</html>

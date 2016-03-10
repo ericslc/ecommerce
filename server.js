@@ -65,4 +65,4 @@ app.delete('/api/products', function(req, res){
 });
 app.listen(port, function(){
 	console.log('Now listening on port: ' + port);
-	});
+});
